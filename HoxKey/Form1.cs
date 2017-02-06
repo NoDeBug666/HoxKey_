@@ -11,6 +11,7 @@ using System.Threading;
 using System.Runtime.InteropServices;
 using Win32_BigEdit;
 using WindowsHook;
+using Win32_BigEdit.Enum;
 
 namespace HoxKey
 {

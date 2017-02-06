@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
-
+using Win32_BigEdit.Enum;
 using WindowsHook;
 
 namespace HoxKey

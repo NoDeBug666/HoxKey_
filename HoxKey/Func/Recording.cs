@@ -11,7 +11,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using Win32_BigEdit;
 using WindowsHook;
-
+using Win32_BigEdit.Enum;
 namespace HoxKey
 {
     public partial class CustomMenu:Form

@@ -7,6 +7,7 @@ using WindowsHook;
 using Win32_BigEdit;
 using System.Runtime.InteropServices;
 using System.IO;
+using Win32_BigEdit.Enum;
 
 namespace HoxKey
 {
