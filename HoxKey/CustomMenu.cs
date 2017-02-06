@@ -165,6 +165,7 @@ namespace HoxKey
 
         private void Script_SelectedIndexChanged(object sender, EventArgs e)
         {
+            //TODO: New way to get line count, this doesn't work on mulpity-lines selection
             if (Script.SelectedIndex != -1)
                 toolStripStatusLabel2.Text = String.Format("行數{0,5}",Script.SelectedIndex);
             else
@@ -213,6 +214,7 @@ namespace HoxKey
         }
         private void RemoveScript_Btn_Click(object sender, EventArgs e)
         {
+            //TODO: Optimize remove command action
             if(Script.SelectedItem != null && !(Script.SelectedItem is EmptyCommand))
             {
                 int Index = Script.SelectedIndex;
@@ -310,11 +312,11 @@ namespace HoxKey
         }
         private void Rename_btn_Click(object sender, EventArgs e)
         {
-
+            //TODO:Add remane script method
         }
         private void Remove_btn_Click(object sender, EventArgs e)
         {
-
+            //TODO:Add remoev script method
         }
         private void StartRecord_Btn_Click(object sender, EventArgs e)
         {

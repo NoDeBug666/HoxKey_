@@ -12,6 +12,7 @@ namespace HoxKey
 {
     public static class Commands
     {
+        //TODO: 改進這種奇妙的設計方式
         public static Type MoveMouse { get { return typeof(MoveMouse); } }
         public static Type ClickMouse { get { return typeof(ClickMouse); } }
         public static Type Pause { get { return typeof(Pause); } }
@@ -366,9 +367,7 @@ namespace HoxKey
     // TODO 新增Key Toggle Switch Command
     // TODO 新增Condition Command
     // TODO 圖片偵測
-    //目前想法是:搜尋整個畫面,找長得很像的那個地方,把視角橋過去,然後看看分析其準確程度
-    //如果真的是那就呼叫Dig Function
-    //如果不是那就算了
+    // TODO 新增其他腳本呼叫功能 (IMPORTANT)
 
     [Serializable]
     [CommandVersion(1)]
@@ -541,79 +540,5 @@ namespace HoxKey
         {
             this.Version = v;
         }
-    }
-    [AttributeUsage(AttributeTargets.Method,AllowMultiple =false,Inherited =false)]
-    public class CommandSerializationMethod : Attribute
-    {
-        Type t;
-        int Version;
-        public CommandSerializationMethod(Type t,int v)
-        {
-            this.t = t;
-            this.Version = v;
-        }
-    }
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
-    public class CommandDeSerializationMethod : Attribute
-    {
-        Type t;
-        int Version;
-        public CommandDeSerializationMethod(Type t, int v)
-        {
-            this.t = t;
-            this.Version = v;
-        }
-    }
-
-    public sealed class CommandFormatter
-    {
-        //我們設定,每個命令要序列化都必須透過這個類別內的方法來實作
-        //傳入必須要有,要序列的命令TypeObject,序列命令的版本,Stream
-        //Serialize : 搜尋該命令的序列方法,傳入序列物件,然後回傳序列結果byte[]
-        //Deserialize : 搜尋該命令的反序列方法,傳入序列Stream,然後回傳序列結果
-        public byte[] Serialize(Type CommandType,object Command,int Version)
-        {
-            //Search
-            throw new NotSupportedException();
-        }
-
-        #region Serialize
-
-        internal delegate byte[] SerDelegate(object Command);
-
-        [CommandSerializationMethod(typeof(MoveMouse),1)]
-        private byte[] sMouseMove(object cmd)
-        {
-            MoveMouse m = (MoveMouse)cmd;
-            byte[] b = new byte[8];
-            int i = 0;
-            foreach (byte bb in BitConverter.GetBytes(m.mx))
-                b[i++] = bb;
-            foreach (byte bb in BitConverter.GetBytes(m.my))
-                b[i++] = bb;
-            return b;
-        }
-
-        #endregion
-
-        #region DeSerialize
-
-        internal delegate ICommand DeSerDelegate(Stream s);
-
-        [CommandDeSerializationMethod(typeof(MoveMouse), 1)]
-        private ICommand sMouseMove(Stream s)
-        {
-            MoveMouse m = new MoveMouse();
-            byte[] b = new byte[8];
-
-            int get = s.Read(b, 0, 8);
-            if (get != 8)
-                throw new System.Runtime.Serialization.SerializationException("資料讀取已到底");
-            m.mx = BitConverter.ToInt32(b, 0);
-            m.my = BitConverter.ToInt32(b, 4);
-            return m;
-        }
-
-        #endregion
     }
 }
