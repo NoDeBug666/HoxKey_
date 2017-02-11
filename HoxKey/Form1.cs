@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 using Win32_BigEdit;
 using WindowsHook;
 using Win32_BigEdit.Enum;
+using System.Diagnostics;
 
 namespace HoxKey
 {
@@ -162,7 +163,8 @@ namespace HoxKey
             Thread.Sleep(CommonPara.BeginDelay);
             Invoke(new Action(S_Begin));
 
-            DateTime start = DateTime.Now;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             #region 整體命令操作
             while (Line < cmds.Length)
             {
@@ -229,13 +231,11 @@ namespace HoxKey
                     Line++;
             }
             #endregion
-            DateTime end = DateTime.Now;
-
+            sw.Stop();
             Invoke(new Action(S_Finish));
-            // TODO:改StopWatch
             Invoke(new Action(delegate ()
             {
-                richTextBox1.Text += "\n[###]總操作時間:" + (end - start).TotalMilliseconds + "ms\n";
+                richTextBox1.Text += "\n[###]總操作時間:" + sw.ElapsedMilliseconds + "ms\n";
             }));
         }
         private void ShutDown(object state)
@@ -385,19 +385,9 @@ namespace HoxKey
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Thread t = new Thread(delegate ()
-            {
-                Thread.Sleep(1000);
-                InputManagement.INPUT[] ins = new InputManagement.INPUT[4];
-                ins[0] = InputManagement.Get_keyboard_input(VirtualKeyShort.KEY_A, true, 1000);
-                ins[1] = InputManagement.Get_keyboard_input(VirtualKeyShort.KEY_B, true, 1000);
-                ins[2] = InputManagement.Get_keyboard_input(VirtualKeyShort.KEY_C, true, 1000);
-                ins[3] = InputManagement.Get_keyboard_input(VirtualKeyShort.KEY_D, true, 1000);
-                InputManagement.SendInput(4, ref ins[0], Marshal.SizeOf(ins[0]));
-            });
-
-            t.Start();
-            
+            string res="";
+            HoxKey.Func.InputDialog.InputBox("title", "666", ref res);
+            MessageBox.Show(res);
         }
 
     }

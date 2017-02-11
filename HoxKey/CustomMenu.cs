@@ -106,7 +106,7 @@ namespace HoxKey
                 Control ctl = null;
 
                 //形態資料取得
-                Type InputType = Type.GetType(properity.FieldType.FullName);
+                Type InputType = Type.GetType(properity.FieldType.AssemblyQualifiedName);
                 if (InputType == typeof(uint))
                     ctl = new NumericUpDown()
                     {
@@ -165,8 +165,12 @@ namespace HoxKey
 
         private void Script_SelectedIndexChanged(object sender, EventArgs e)
         {
-            //TODO: New way to get line count, this doesn't work on mulpity-lines selection
-            if (Script.SelectedIndex != -1)
+            if(Script.SelectedIndices.Count > 1)
+                toolStripStatusLabel2.Text = String.Format("最後行數{0,5},共選了{1,5}行"
+                    , Script.SelectedIndices[Script.SelectedIndices.Count-1],
+                    Script.SelectedIndices.Count
+                    );
+            else if (Script.SelectedIndex != -1)
                 toolStripStatusLabel2.Text = String.Format("行數{0,5}",Script.SelectedIndex);
             else
                 toolStripStatusLabel2.Text = "行數";
@@ -214,7 +218,6 @@ namespace HoxKey
         }
         private void RemoveScript_Btn_Click(object sender, EventArgs e)
         {
-            //TODO: Optimize remove command action
             if(Script.SelectedItem != null && !(Script.SelectedItem is EmptyCommand))
             {
                 int Index = Script.SelectedIndex;
@@ -254,7 +257,13 @@ namespace HoxKey
             int optimization = MouseMoveOptimization(cmds, Math.Tan(Math.PI/180));
             MessageBox.Show(string.Format("整合了{0}個命令",optimization));
         }
-
+        private void 清空腳本ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (cmds.Count == 0)
+                return;
+            if (MessageBox.Show("確定要清空當前的腳本內容嗎?", "確認", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                cmds.Clear();
+        }
         void Refresh_ScriptList()
         {
             ScriptList.Items.Clear();
@@ -312,11 +321,31 @@ namespace HoxKey
         }
         private void Rename_btn_Click(object sender, EventArgs e)
         {
-            //TODO:Add remane script method
+            if (ScriptList.SelectedItem == null)
+                return;
+            //Get new name
+            string NewName = "";
+            if (Func.InputDialog.InputBox("重新命名", "輸入新名稱", ref NewName) != DialogResult.OK)
+                return;
+            string path = Const.ScriptDicPath + "\\" + ScriptList.SelectedItem.ToString();
+            string NewPath = Const.ScriptDicPath + "\\" + NewName + "." + Const.ScriptFileExtension;
+            FileInfo info = new FileInfo(path);
+            info.CopyTo(NewPath);
+            info.Delete();
+            Refresh_ScriptList();
         }
         private void Remove_btn_Click(object sender, EventArgs e)
         {
-            //TODO:Add remoev script method
+            if (ScriptList.SelectedItem == null)
+                return;
+            string scriptName = ScriptList.SelectedItem.ToString();
+            if (MessageBox.Show(String.Format("確定要刪除腳本 \"{0}\" 嗎",scriptName),"確認",MessageBoxButtons.YesNo) == DialogResult.Yes)
+            {
+                string path = Const.ScriptDicPath + "\\" + scriptName;
+                FileInfo info = new FileInfo(path);
+                info.Delete();
+                Refresh_ScriptList();
+            }
         }
         private void StartRecord_Btn_Click(object sender, EventArgs e)
         {
@@ -360,5 +389,6 @@ namespace HoxKey
             s.interval = new ushort[] { 0x8000 + 500, 0x8000 + 1000, 0x8000 + 1500 };
             cmds.Add(s);
         }
+
     }
 }

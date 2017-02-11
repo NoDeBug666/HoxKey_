@@ -62,6 +62,7 @@ namespace HoxKey
             return result;
         }
 
+        //TODO:有Bug導致優化結果不正常,需要修正
         /// <summary>
         /// 優化腳本的位移命令,將多個位移命令轉成平滑的位移,缺點是會缺失位移過程的精準度
         /// </summary>

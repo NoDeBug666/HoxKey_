@@ -8,7 +8,7 @@ using Win32_BigEdit;
 using System.Runtime.InteropServices;
 using System.IO;
 using Win32_BigEdit.Enum;
-
+using System.Diagnostics;
 namespace HoxKey
 {
     public static class Commands
@@ -383,51 +383,44 @@ namespace HoxKey
         {
             return String.Format("[精密]滑鼠游標 位移  ({0},{1}) , 耗時{2}", mx, my,time);
         }
-        //TODO:修正時間內位移不夠精準的問題....
         public override void Action(Argument arg)
         {
-            DateTime cur = DateTime.Now;
-            DateTime check;
-            DateTime end = DateTime.Now.Add(TimeSpan.FromMilliseconds(time));
-            TimeSpan ts;
-            //每毫秒增進的長度
-            double add_x = (double)mx / time;
-            double add_y = (double)my / time;
-            //累計的增進值
-            double con_x, con_y;
-            int debugx, debugy;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            //movement 
+            double x_addup = 0;
+            double y_addup = 0;
+            double x_per_ms = (double)mx / time;
+            double y_per_ms = (double)my / time;
+            int x, y;
+            //time
+            long lastCheck = 0;
+            long Difference = 0;
+            long temp;
 
-            debugx = debugy = 0;
-            con_x = con_y = 0;
-            
+            int x_sum = 0,y_sum = 0;
+
             do
             {
-                check = DateTime.Now;
-                //如果有到達一毫秒才移動
-                ts = check - cur;
-                if(ts >= TimeSpan.FromMilliseconds(1))
-                {
-                    con_x += (add_x) * ts.Milliseconds;
-                    con_y += (add_y) * ts.Milliseconds;
-                    //如果有累計大於1像素的移動,呼叫移動函數
-                    if(con_x >= 1 || con_y >= 1 || con_x <= -1 || con_y <= -1)
-                    {
-                        InputManagement.MouseMove((int)con_x, (int)con_y);
-                        debugx += (int)con_x;
-                        debugy += (int)con_y;
-                        con_x -= (int)con_x;
-                        con_y -= (int)con_y;
-                    }
-                    cur = check;
-                }
-                
-            } while (cur < end);
-            System.Diagnostics.Debug.WriteLine("cost " + debugx + " " + debugy);
-            System.Diagnostics.Debug.WriteLine("con " + con_x + " " + con_y);
-            InputManagement.MouseMove(mx - debugx, my - debugy);
-            debugx += mx - debugx;
-            debugy += my - debugy;
-            System.Diagnostics.Debug.WriteLine(debugx + " " + debugy);
+                //compute current mouse position
+                temp = sw.ElapsedMilliseconds;
+                Difference = temp - lastCheck;
+                lastCheck = temp;
+
+                x_addup += x_per_ms * Difference;
+                y_addup += y_per_ms * Difference;
+
+                x = (int)x_addup;
+                y = (int)y_addup;
+
+                InputManagement.MouseMove(x, y);
+
+                x_addup -= x;
+                y_addup -= y;
+                x_sum += x;
+                y_sum += y;
+            } while (sw.ElapsedMilliseconds < time);
+            InputManagement.MouseMove(mx - x_sum, my - y_sum);
         }
     }
 
@@ -448,48 +441,15 @@ namespace HoxKey
         }
         public override void Action(Argument arg)
         {
-            DateTime cur = DateTime.Now;
-            DateTime check;
-            DateTime end = DateTime.Now.Add(TimeSpan.FromMilliseconds(time));
-            TimeSpan ts;
-            //每毫秒增進的長度
-            double add_x = (double)mx / time;
-            double add_y = (double)my / time;
-            //累計的增進值
-            double con_x, con_y;
-            int debugx, debugy;
-
-            debugx = debugy = 0;
-            con_x = con_y = 0;
-
+            Stopwatch sw = new Stopwatch();
+            sw.Start();            
             do
             {
-                check = DateTime.Now;
-                //如果有到達一毫秒才移動
-                ts = check - cur;
-                if (ts >= TimeSpan.FromMilliseconds(1))
-                {
-                    con_x += (add_x) * ts.Milliseconds;
-                    con_y += (add_y) * ts.Milliseconds;
-                    //如果有累計大於1像素的移動,呼叫移動函數
-                    if (con_x >= 1 || con_y >= 1 || con_x <= -1 || con_y <= -1)
-                    {
-                        InputManagement.MouseMoveAbs(sx+(int)con_x+debugx, sy+(int)con_y+debugy);
-                        debugx += (int)con_x;
-                        debugy += (int)con_y;
-                        con_x -= (int)con_x;
-                        con_y -= (int)con_y;
-                    }
-                    cur = check;
-                }
-
-            } while (cur < end);
-            System.Diagnostics.Debug.WriteLine("cost " + debugx + " " + debugy);
-            System.Diagnostics.Debug.WriteLine("con " + con_x + " " + con_y);
+                //compute current mouse position
+                double progress = sw.ElapsedMilliseconds / (double)time;
+                InputManagement.MouseMoveAbs((int)(sx + mx * progress), (int)(sy + my * progress));
+            } while (sw.ElapsedMilliseconds < time);
             InputManagement.MouseMoveAbs(sx + mx, sy + my);
-            debugx += mx - debugx;
-            debugy += my - debugy;
-            System.Diagnostics.Debug.WriteLine(debugx + " " + debugy);
         }
     }
 
