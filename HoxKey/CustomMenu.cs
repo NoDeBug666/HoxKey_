@@ -254,7 +254,17 @@ namespace HoxKey
         // Menu Strip
         private void 滑鼠移動整合ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            int optimization = MouseMoveOptimization(cmds, Math.Tan(Math.PI/180));
+            string input = "1";
+            if (Func.InputDialog.InputBox("滑鼠位移整合", "輸入允許的誤差角度(輸入單位為角度(0~359))", ref input) != DialogResult.OK)
+                return;
+            double dis;
+            if(!Double.TryParse(input,out dis))
+            {
+                MessageBox.Show("輸入的值無法轉乘數字! [" + input + "]");
+                return;
+            }
+
+            int optimization = MouseMoveOptimization(cmds, dis);
             MessageBox.Show(string.Format("整合了{0}個命令",optimization));
         }
         private void 清空腳本ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -263,6 +273,20 @@ namespace HoxKey
                 return;
             if (MessageBox.Show("確定要清空當前的腳本內容嗎?", "確認", MessageBoxButtons.YesNo) == DialogResult.Yes)
                 cmds.Clear();
+        }
+        private void 統計腳本總暫停時間ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            int sum = 0;
+            foreach (var item in cmds)
+                if (item is Pause)
+                    sum += (int)(item as Pause).PauseTime;
+                else if (item is hVkSerial)
+                    sum += (item as hVkSerial).interval.Sum((ushort s) => s);
+                else if (item is hMouseMove)
+                    sum += (int)(item as hMouseMove).time;
+                else if (item is hMouseMoveAbs)
+                    sum += (int)(item as hMouseMoveAbs).time;
+            MessageBox.Show(String.Format("腳本的估計運行時間:{0}", sum));
         }
         void Refresh_ScriptList()
         {

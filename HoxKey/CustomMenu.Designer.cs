@@ -50,9 +50,10 @@
             this.StopRecording_btn = new System.Windows.Forms.Button();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.腳本ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.清空腳本ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.優化ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.滑鼠移動整合ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.清空腳本ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.統計腳本總運行時間ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.StatusStrip.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -268,10 +269,18 @@
             // 腳本ToolStripMenuItem
             // 
             this.腳本ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.清空腳本ToolStripMenuItem});
+            this.清空腳本ToolStripMenuItem,
+            this.統計腳本總運行時間ToolStripMenuItem});
             this.腳本ToolStripMenuItem.Name = "腳本ToolStripMenuItem";
             this.腳本ToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
             this.腳本ToolStripMenuItem.Text = "腳本";
+            // 
+            // 清空腳本ToolStripMenuItem
+            // 
+            this.清空腳本ToolStripMenuItem.Name = "清空腳本ToolStripMenuItem";
+            this.清空腳本ToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.清空腳本ToolStripMenuItem.Text = "清空腳本";
+            this.清空腳本ToolStripMenuItem.Click += new System.EventHandler(this.清空腳本ToolStripMenuItem_Click);
             // 
             // 優化ToolStripMenuItem
             // 
@@ -284,16 +293,16 @@
             // 滑鼠移動整合ToolStripMenuItem
             // 
             this.滑鼠移動整合ToolStripMenuItem.Name = "滑鼠移動整合ToolStripMenuItem";
-            this.滑鼠移動整合ToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
+            this.滑鼠移動整合ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.滑鼠移動整合ToolStripMenuItem.Text = "滑鼠移動整合";
             this.滑鼠移動整合ToolStripMenuItem.Click += new System.EventHandler(this.滑鼠移動整合ToolStripMenuItem_Click);
             // 
-            // 清空腳本ToolStripMenuItem
+            // 統計腳本總運行時間ToolStripMenuItem
             // 
-            this.清空腳本ToolStripMenuItem.Name = "清空腳本ToolStripMenuItem";
-            this.清空腳本ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.清空腳本ToolStripMenuItem.Text = "清空腳本";
-            this.清空腳本ToolStripMenuItem.Click += new System.EventHandler(this.清空腳本ToolStripMenuItem_Click);
+            this.統計腳本總運行時間ToolStripMenuItem.Name = "統計腳本總運行時間ToolStripMenuItem";
+            this.統計腳本總運行時間ToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.統計腳本總運行時間ToolStripMenuItem.Text = "統計腳本總運行時間";
+            this.統計腳本總運行時間ToolStripMenuItem.Click += new System.EventHandler(this.統計腳本總暫停時間ToolStripMenuItem_Click);
             // 
             // CustomMenu
             // 
@@ -362,5 +371,6 @@
         private System.Windows.Forms.ToolStripMenuItem 優化ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 滑鼠移動整合ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 清空腳本ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 統計腳本總運行時間ToolStripMenuItem;
     }
 }

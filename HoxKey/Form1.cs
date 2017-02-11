@@ -21,7 +21,7 @@ namespace HoxKey
         public Form1()
         {
             InitializeComponent();
-
+            
             ModeSwitch();
         }
         CustomMenu cm = null;

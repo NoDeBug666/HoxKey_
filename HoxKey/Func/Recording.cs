@@ -62,7 +62,6 @@ namespace HoxKey
             return result;
         }
 
-        //TODO:有Bug導致優化結果不正常,需要修正
         /// <summary>
         /// 優化腳本的位移命令,將多個位移命令轉成平滑的位移,缺點是會缺失位移過程的精準度
         /// </summary>
@@ -77,21 +76,22 @@ namespace HoxKey
             {
                 if(cmds[i] is MoveMouse)
                 {
-                    MoveMouse begin = cmds[i] as MoveMouse;
+                    MoveMouse begin = cmds[i] as MoveMouse; //取得第一個命令
                     MoveMouse end = null;
-                    int xTotal = begin.mx;
-                    int yTotal = begin.my;
-                    double Begin_m = Double.NaN;            //從起點開始和下一個位移形成的夾角徑度
-                    uint CostTime = 0;
-                    int Combined = 1;
-                    bool IsAbsolute = begin.IsAbsolute;
-                    //開始向前進,嘗試融合命令
+                    int xTotal = begin.mx;                  //總X座標位移
+                    int yTotal = begin.my;                  //總Y座標位移
+                    double Begin_m = GetAngle(begin);       //起始位移和正向X軸的夾角
+                    uint CostTime = 0;                      //記錄位移總消耗時間
+                    int Combined = 1;                       //記錄已經結合多少個命令
+                    bool IsAbsolute = begin.IsAbsolute;     //是否為絕對位置位移
+                    //開始向前搜尋,嘗試融合命令
                     int index = i + 1;
                     while(index < cmds.Count && (cmds[index] is MoveMouse || cmds[index] is Pause) )
                     {
+                        //搜尋到的下個命令是暫停
                         if(cmds[index] is Pause)
                         {
-                            //是經過時間,增加消耗時間
+                            //位移時間累計上升
                             CostTime += (cmds[index] as Pause).PauseTime;
                             cmds.RemoveAt(index);
                             Combined++;
@@ -102,43 +102,25 @@ namespace HoxKey
                             //跳過不同類的命令
                             if (temp.IsAbsolute != IsAbsolute)
                                 break;
+                            //確認命令的角度差,是否超過允許誤差範圍
+                            double End_m = GetAngle(temp);
+                            if (!InDifferenceRange(Begin_m, End_m, Distinction))
+                                break;
+                            //確認可以合併,統整此操作的資料
                             end = temp;
                             xTotal += end.mx;
                             yTotal += end.my;
                             cmds.RemoveAt(index);
                             Combined++;
-                            //計算起點和終點的斜率
-                            double m;
-                            if (end.mx != begin.mx)
-                                //計算角度
-                                m = Math.Atan((end.my - begin.my) / (end.mx - begin.mx));
-                            else
-                                //無斜率90度
-                                m = Math.PI / 180 * 90;
-
-                            //如果在第三或四象限,角度增加180
-                            if (end.mx - begin.mx < 0 && end.my - begin.my < 0)
-                                m += Math.PI;
-                                    
-                            //如果沒有切線資料,現在保存
-                            if (Double.IsNaN(Begin_m))
-                                Begin_m = m;
-                            if (
-                                Math.Min(
-                                    Math.Max(Begin_m,m)-Math.Min(Begin_m,m),                        //逆時針角度差
-                                    2*Math.PI - Math.Max(Begin_m,m) + Math.Min(Begin_m,m))          //順時針角度差
-                                    > Distinction)
-                            {
-                                System.Diagnostics.Debug.WriteLine(
-                                    String.Format("角度差:{0}", Math.Max(Begin_m, m) - Math.Min(Begin_m, m),2 * Math.PI - Math.Max(Begin_m, m) + Math.Min(Begin_m, m))
-                                    );
-                                break;
-                            }
                         }
                     }
-                    if (Combined == 0 || end == null)
+                    //如果沒有整合到任何命令,直接離開
+                    if (Combined == 0)
                         continue;
+                    if (end == null)
+                        end = new MoveMouse() { mx = begin.mx, my = begin.my };
                     sum += Combined;
+                    //產生整合過的命令,並且加入命令列
                     ICommand res;
                     if (IsAbsolute)
                         res = new hMouseMoveAbs()
@@ -161,6 +143,25 @@ namespace HoxKey
                 }
             }
             return sum;
+        }
+        /// <summary>
+        /// 取得一個位移命令和假想地平線的夾角
+        /// </summary>
+        /// <param name="m1">第一個位移命令</param>
+        /// <returns></returns>
+        public double GetAngle(MoveMouse m1)
+        {
+            return GetAngle(m1.mx, m1.my);
+        }
+        public double GetAngle(double x,double y)
+        {
+            return (Math.Atan2(y, x)/Math.PI*180+360)%360;
+        }
+        public bool InDifferenceRange(double main,double check,double distinction)
+        {
+            double a1 = Math.Abs(main - check);
+            double a2 = Math.Abs(main + 360 - check);
+            return a1 < distinction || a2 < distinction;
         }
 
         //Recording Mouse and keyboard

@@ -112,12 +112,12 @@ namespace HoxKey
         }
         public override void Action(Argument arg)
         {
-            System.Diagnostics.Debug.WriteLine("Before" + System.Windows.Forms.Cursor.Position.X + "," + System.Windows.Forms.Cursor.Position.Y);
+            
             if (IsAbsolute)
                 InputManagement.MouseMoveAbs(mx, my);
             else
                 InputManagement.MouseMove(mx, my);
-            System.Diagnostics.Debug.WriteLine("After" + System.Windows.Forms.Cursor.Position.X + "," + System.Windows.Forms.Cursor.Position.Y);
+           
         }
 
     }
@@ -151,7 +151,9 @@ namespace HoxKey
         }
         public override void Action(Argument arg)
         {
-            System.Threading.Thread.Sleep((int)PauseTime);
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            while (sw.ElapsedMilliseconds < PauseTime) ;
         }
     }
 
@@ -369,7 +371,22 @@ namespace HoxKey
     // TODO 新增Condition Command
     // TODO 圖片偵測
     // TODO 新增其他腳本呼叫功能 (IMPORTANT)
-
+    [Serializable]
+    [CommandVersion(1)]
+    [CommandDescription(Description = "呼叫其他腳本")]
+    public class CallScript : ICommand
+    {
+        public string Path;
+           
+        public override string ToString()
+        {
+            return "呼叫腳本 [" + Path +"]";
+        }
+        public override void Action(Argument args)
+        {
+            
+        }
+    }
     [Serializable]
     [CommandVersion(1)]
     [CommandDescription(Description = "平滑地移動滑鼠")]
@@ -381,12 +398,17 @@ namespace HoxKey
         public uint time;
         public override string ToString()
         {
-            return String.Format("[精密]滑鼠游標 位移  ({0},{1}) , 耗時{2}", mx, my,time);
+            return String.Format("平滑游標 位移  ({0},{1}) , 耗時{2}", mx, my,time);
         }
         public override void Action(Argument arg)
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
+            if(time == 0)
+            {
+                InputManagement.MouseMove(mx ,my);
+                return;
+            }
             //movement 
             double x_addup = 0;
             double y_addup = 0;
@@ -437,18 +459,21 @@ namespace HoxKey
         public int sx, sy;
         public override string ToString()
         {
-            return String.Format("[精密]絕對滑鼠游標 自({3},{4}) 位移  ({0},{1}) , 耗時{2}", mx, my, time, sx, sy);
+            return String.Format("平滑游標 自({3},{4}) 位移 ({0},{1}) , 耗時{2}", mx, my, time, sx, sy);
         }
         public override void Action(Argument arg)
         {
             Stopwatch sw = new Stopwatch();
-            sw.Start();            
-            do
+            sw.Start();
+            if (time != 0)
             {
-                //compute current mouse position
-                double progress = sw.ElapsedMilliseconds / (double)time;
-                InputManagement.MouseMoveAbs((int)(sx + mx * progress), (int)(sy + my * progress));
-            } while (sw.ElapsedMilliseconds < time);
+                do
+                {
+                    //compute current mouse position
+                    double progress = sw.ElapsedMilliseconds / (double)time;
+                    InputManagement.MouseMoveAbs((int)(sx + mx * progress), (int)(sy + my * progress));
+                } while (sw.ElapsedMilliseconds < time);
+            }
             InputManagement.MouseMoveAbs(sx + mx, sy + my);
         }
     }
