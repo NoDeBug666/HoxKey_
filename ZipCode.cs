@@ -44,14 +44,12 @@
                     }
 
                     //角度判斷
-                    //TODO:寫單元測試,看這個做法能不能正確的算出它們的角度和位置
                     double newSita = GetAngle(disx,disy);
                     bool Success = true;
                     if (!InDifferenceRange(EnsureSita, newSita, Distinction))
                         Success = false;
 
                     //速度判斷
-                    //TODO:寫單元測試,看這個做法能不能正確的算出它們的角度和位置
                     double newSpeed = GetSpeed(disx,disy,costTime);
                     if (!InSpeedDifferenceRange(EnsureSpeed, newSpeed, Distinction))
                         Success = false;
